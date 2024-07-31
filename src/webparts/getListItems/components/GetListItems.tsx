@@ -8,33 +8,96 @@ import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
+import {IColumn} from '@fluentui/react';
 
 //let panelHTML: string;
 export interface IAsyncAwaitPnPJsProps {
   description: string;
 }
 
-export interface IState {  
-  listItems: any;
+export interface IStates {  
+  listItems: IListItem[];
   listFlag: boolean;
+  columns: any;
 }
 
-export default class GetListItems extends React.Component<IGetListItemsProps,IState,{}> {
+export interface IListItem {
+  linkTitle : string;
+  linkURL: string;
+  linkOrder: number;
+  linkBrowse: string;
+  linkGroup: number;
+}
+
+export default class GetListItems extends React.Component<IGetListItemsProps,IStates,{}> {
   //constructor(props: IGetListItemsProps | Readonly<IGetListItemsProps>) {
   //  super(props);
   //}
 
-  //private LOG_SOURCE = "🅿PnPjsExample";
-  //private LIBRARY_NAME = "Documents";
   private _sp: SPFI;
 
   constructor(props: IGetListItemsProps) {
     super(props);
 
+    const columns: IColumn[] = [
+      {
+        key: "linkTitle",
+        name: "",
+        fieldName: "LinkName",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "string",
+        isPadded: true
+      },
+      {
+        key: "linkURL",
+        name: "",
+        fieldName: "LinkURL",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "string",
+        isPadded: true
+      },
+      {
+        key: "linkBrowse",
+        name: "",
+        fieldName: "LinkBrowse",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "string",
+        isPadded: true
+      },
+      {
+        key: "linkOrder",
+        name: "",
+        fieldName: "LinkOrder",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "number",
+        isPadded: true
+      },
+      {
+        key: "linkGroup",
+        name: "",
+        fieldName: "GroupID",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "number",
+        isPadded: true
+      }
+    ]
+
     // set initial state
     this.state = {
-      listFlag: false,
       listItems: [],
+      columns: columns,
+      listFlag: false,
+
     };
     this._sp = getSP();
   }
@@ -42,7 +105,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
   public componentDidMount(): void {
     // read all file sizes from Documents library
     //this._readAllFilesSize();
-    this._renderListAsync();
+    this._getListData();
   }
 
   public render(): React.ReactElement<IGetListItemsProps> {
@@ -54,7 +117,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       userDisplayName,
     } = this.props;
 
-    console.log("html",this.state);
+    console.log("listItems",this.state.listItems);
 
     return (
       <section className={`${styles.getListItems} ${hasTeamsContext ? styles.teams : ''}`}>
@@ -65,7 +128,6 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
         <h4>List Items</h4>
-        {this.state.listItems}
         <div>
           <h3>Welcome to SharePoint Framework!</h3>
           <p>
@@ -94,16 +156,25 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
         const responseJSONsec: any = await responsesec.json();
 */
 
-  private async _renderListAsync(): Promise<void> { 
+  private async _getListData(): Promise<void> { 
+    const data:IListItem[]=[];
     const items : any[] = await this._sp.web.lists.getByTitle('Important Links').items();
-    let htmlString : string;
+    //let htmlString : string;
 
     console.log("items",items);
     items.forEach((item) => {
       console.log(item.LinkName);
       //const linkTitle = item.LinkName;
-      htmlString += `<div>${item.LinkName}</div>`;  
-      this.setState({listItems:htmlString})           
+      //htmlString += `<div>${item.LinkName}</div>`;  
+      data.push({
+        linkTitle:item.LinkName,
+        linkURL:item.LinkURL,
+        linkOrder:item.LinkOrder,
+        linkBrowse: item.LinkBrowse,
+        linkGroup: item.GroupID
+      })           
     });
+    console.log(data);
+    this.setState({listItems: data});
   }
 }

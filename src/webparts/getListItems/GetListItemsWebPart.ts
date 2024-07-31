@@ -15,6 +15,7 @@ import { getSP } from './pnpjsConfig';
 
 export interface IGetListItemsWebPartProps {
   description: string;
+  siteURL: string;
   
 }
 
@@ -32,7 +33,7 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
-        siteURL: this.context.pageContext.site.absoluteUrl
+        siteURL: this.context.pageContext.site.absoluteUrl,
       }
     );
 
