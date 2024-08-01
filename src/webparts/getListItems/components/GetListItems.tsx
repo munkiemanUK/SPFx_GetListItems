@@ -10,7 +10,7 @@ import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
-import {SPHttpClient} from '@microsoft/sp-http';
+import {SPHttpClient,SPHttpClientResponse} from '@microsoft/sp-http';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
 //import Accordion from './AccordionComponent/Accordion';
@@ -221,22 +221,25 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       }); 
          
     // https://maximusunitedkingdom.sharepoint.com/sites/apptesting/_api/sitepages/pages(2)  
-    const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
-    const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
-    if(_data.ok){
-      const results = _data.json();
-      console.log("webpart results",results);
-      if(results){
-        const canvasContent = JSON.parse(results.CanvasContent1);
-        for(const v of canvasContent){
-          if(v.id === this.context.instanceId){
-            console.log("webpart",v.webPartData.properties);
-            break;
-          }
-        }
+    this._renderListAsync();
+
+
+    //const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
+    //const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
+    //if(_data.ok){
+    //  const results = _data.json();
+    //  console.log("webpart results",results);
+    //  if(results){
+    //    const canvasContent = JSON.parse(results.CanvasContent1);
+    //    for(const v of canvasContent){
+    //      if(v.id === this.context.instanceId){
+    //        console.log("webpart",v.webPartData.properties);
+    //        break;
+    //      }
+    //    }
         //this.currentPage = results;
-      }
-    }
+    //  }
+    //}
     
     //const items : any[] = await this._sp.web.lists.getByTitle('Important Links').items();
     //console.log("items",items);
@@ -252,6 +255,20 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //});
     //console.log(data);
     //this.setState({listItems: data});
+  }
+
+  private _getData() : Promise<any> {
+    return this.context.spHttpClient.get(this.context.pageContext.web.absoluteUrl + `/_api/sitepages/pages(1)`, SPHttpClient.configurations.v1)
+      .then((response: SPHttpClientResponse) => {
+        return response.json();
+      })
+  }
+
+  private _renderListAsync(): void {
+    this._getData()
+      .then((response) => {
+        console.log(response.json());
+      });
   }
 
   public _onRenderItemColumn = (item: IListItem): JSX.Element | string => {
