@@ -11,7 +11,12 @@
       ]
     }
   },
-  "externals": {},
+  "externals": {
+    "bootstrap": {
+      "path": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+      "globalName": "bootstrap"
+    }
+  },
   "localizedResources": {
     "GetListItemsWebPartStrings": "lib/webparts/getListItems/loc/{locale}.js"
   }

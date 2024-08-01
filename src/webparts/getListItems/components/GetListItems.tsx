@@ -4,11 +4,18 @@ import type { IGetListItemsProps } from './IGetListItemsProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
 import { SPFI } from "@pnp/sp";
+import { Web } from "@pnp/sp/webs"; 
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
+import {SPHttpClient} from '@microsoft/sp-http';
+
+//DetailsList, DetailsListLayoutMode, SelectionMode
+//import Accordion from './AccordionComponent/Accordion';
+
+require('bootstrap');
 
 //let panelHTML: string;
 export interface IAsyncAwaitPnPJsProps {
@@ -26,7 +33,8 @@ export interface IListItem {
   linkURL: string;
   linkOrder: number;
   linkBrowse: string;
-  linkGroup: number;
+  linkGroupID: number;
+  linkGroupName: string;
 }
 
 export default class GetListItems extends React.Component<IGetListItemsProps,IStates,{}> {
@@ -81,7 +89,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
         isPadded: true
       },
       {
-        key: "linkGroup",
+        key: "linkGroupID",
         name: "",
         fieldName: "GroupID",
         minWidth:0,
@@ -89,7 +97,17 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
         isResizable: true,
         data: "number",
         isPadded: true
-      }
+      },
+      {
+        key: "linkGroupName",
+        name: "",
+        fieldName: "GroupName",
+        minWidth:0,
+        maxWidth:50,
+        isResizable: true,
+        data: "number",
+        isPadded: true
+      }      
     ]
 
     // set initial state
@@ -103,8 +121,6 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
   }
 
   public componentDidMount(): void {
-    // read all file sizes from Documents library
-    //this._readAllFilesSize();
     this._getListData();
   }
 
@@ -117,7 +133,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       userDisplayName,
     } = this.props;
 
-    console.log("listItems",this.state.listItems);
+    //console.log("listItems",this.state.listItems);
 
     return (
       <section className={`${styles.getListItems} ${hasTeamsContext ? styles.teams : ''}`}>
@@ -128,27 +144,46 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
         <h4>List Items</h4>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
+        <div className="accordion" id="linksAccordion">
+
         </div>
+
+        {this.state.listItems.map(function(item) {
+          let dataTarget = `#group${item.linkGroupID}`;
+          let accordionID = `group${item.linkGroupID}`;
+
+          return(
+            <div className="accordion-item">
+              <h2 className="accordion-header">
+                <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={dataTarget} aria-expanded="true" aria-controls="collapseOne">
+                  Accordion {item.linkGroupID} 
+                </button>
+              </h2>
+              <div id={accordionID} className="accordion-collapse collapse show" data-bs-parent="#linksAccordion">
+                <div className="accordion-body">
+                  <h5 className="">{item.linkTitle}</h5>
+                </div>
+              </div>
+            </div>            
+          );
+        })}
+          
       </section>
     );
   }
 
 /*
+
+        <DetailsList
+          items={this.state.listItems}
+          columns={this.state.columns}
+          setKey="set"
+          layoutMode={DetailsListLayoutMode.justified}
+          isHeaderVisible={true}
+          onRenderItemColumn={this._onRenderItemColumn}
+          selectionMode={SelectionMode.none}
+        />
+
         url = this.props.mysite + "/_api/web/lists/getbytitle('HandS_WPI_Sections')/items?$select=*&$orderby=Title";
 
         const responsesec = await this.props.myhttp.get(url, SPHttpClient.configurations.v1);
@@ -158,23 +193,68 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
 
   private async _getListData(): Promise<void> { 
     const data:IListItem[]=[];
-    const items : any[] = await this._sp.web.lists.getByTitle('Important Links').items();
-    //let htmlString : string;
-
-    console.log("items",items);
-    items.forEach((item) => {
-      console.log(item.LinkName);
-      //const linkTitle = item.LinkName;
-      //htmlString += `<div>${item.LinkName}</div>`;  
-      data.push({
-        linkTitle:item.LinkName,
-        linkURL:item.LinkURL,
-        linkOrder:item.LinkOrder,
-        linkBrowse: item.LinkBrowse,
-        linkGroup: item.GroupID
-      })           
-    });
-    console.log(data);
-    this.setState({listItems: data});
+    const view =`<View>
+                  <Query>
+                    <OrderBy>
+                      <FieldRef Name="GroupID" Ascending="TRUE" />
+                      <FieldRef Name="LinkOrder" Ascending="TRUE" />
+                    </OrderBy>          
+                  </Query>
+                </View>`;
+    const web = Web([this._sp.web,this.props.siteURL]);
+    web.lists.getByTitle('Important Links').getItemsByCAMLQuery({ViewXml:view})
+      .then(async (response) => {
+        console.log("camlItems",response);
+        response.forEach((item: { LinkName: any; LinkURL: any; LinkOrder: any; LinkBrowse: any; GroupID: any; Title:any }) => {
+          console.log(item.LinkName);
+          data.push({
+            linkTitle:item.LinkName,
+            linkURL:item.LinkURL,
+            linkOrder:item.LinkOrder,
+            linkBrowse: item.LinkBrowse,
+            linkGroupID: item.GroupID,
+            linkGroupName : item.Title
+          })           
+        });
+        console.log("data",data);
+        this.setState({listItems: data});    
+      }); 
+         
+    // https://maximusunitedkingdom.sharepoint.com/sites/apptesting/_api/sitepages/pages(2)  
+    const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
+    const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
+    if(_data.ok){
+      const results = _data.json();
+      console.log("webpart results",results);
+      if(results){
+        const canvasContent = JSON.parse(results.CanvasContent1);
+        for(const v of canvasContent){
+          if(v.id === this.context.instanceId){
+            console.log("webpart",v.webPartData.properties);
+            break;
+          }
+        }
+        //this.currentPage = results;
+      }
+    }
+    
+    //const items : any[] = await this._sp.web.lists.getByTitle('Important Links').items();
+    //console.log("items",items);
+    //items.forEach(item => {
+      //console.log(item.LinkName);
+    //  data.push({
+    //    linkTitle:item.LinkName,
+    //    linkURL:item.LinkURL,
+    //    linkOrder:item.LinkOrder,
+    //    linkBrowse: item.LinkBrowse,
+    //    linkGroup: item.GroupID
+    //  })           
+    //});
+    //console.log(data);
+    //this.setState({listItems: data});
   }
+
+  public _onRenderItemColumn = (item: IListItem): JSX.Element | string => {
+    return(<h5 className="">{item.linkTitle}</h5>) ;
+  }   
 }

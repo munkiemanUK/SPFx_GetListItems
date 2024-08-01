@@ -12,6 +12,7 @@ import * as strings from 'GetListItemsWebPartStrings';
 import GetListItems from './components/GetListItems';
 import { IGetListItemsProps } from './components/IGetListItemsProps';
 import { getSP } from './pnpjsConfig';
+import { SPComponentLoader } from '@microsoft/sp-loader';
 
 export interface IGetListItemsWebPartProps {
   description: string;
@@ -43,6 +44,10 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
   public async onInit(): Promise<void> {
     await super.onInit();
     getSP(this.context);
+
+    SPComponentLoader.loadCss("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css");
+    SPComponentLoader.loadCss("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css");
+
     return this._getEnvironmentMessage().then(message => {
       this._environmentMessage = message;
     });
@@ -89,7 +94,6 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
       this.domElement.style.setProperty('--link', semanticColors.link || null);
       this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
     }
-
   }
 
   protected onDispose(): void {
