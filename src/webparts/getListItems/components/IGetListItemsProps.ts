@@ -5,4 +5,6 @@ export interface IGetListItemsProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   siteURL: string;
+  grouptitle1: string;
+  numGroups : number;
 }

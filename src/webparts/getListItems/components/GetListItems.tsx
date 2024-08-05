@@ -114,7 +114,6 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       listItems: [],
       columns: columns,
       listFlag: false,
-
     };
     this._sp = getSP();
   }
@@ -142,12 +141,10 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>{environmentMessage}</div>
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
-        <div id="canvasdata"></div>
+        <div>Group Title : {this.props.grouptitle1}</div>
         <h4>List Items</h4>
+
         <div className="accordion" id="linksAccordion">
-
-        </div>
-
         {this.state.listItems.map(function(item) {
           let dataTarget = `#group${item.linkGroupID}`;
           let accordionID = `group${item.linkGroupID}`;
@@ -167,7 +164,8 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
             </div>            
           );
         })}
-          
+      </div>
+  
       </section>
     );
   }

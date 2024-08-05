@@ -3,7 +3,8 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneSlider
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -18,7 +19,8 @@ import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
 export interface IGetListItemsWebPartProps {
   description: string;
   siteURL: string;
-  
+  grouptitle1 : string;
+  numGroups : number;
 }
 
 export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListItemsWebPartProps> {
@@ -36,6 +38,8 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         siteURL: this.context.pageContext.site.absoluteUrl,
+        grouptitle1: this.properties.grouptitle1,
+        numGroups : this.properties.numGroups
       }
     );
 
@@ -72,13 +76,16 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
       if(wpTitle === "Important Links"){
         
         let gtitle1 : string = item.webPartData.properties.Group1Title;
+        this.properties.grouptitle1 = item.webPartData.properties.Group1Title;
+        this.properties.numGroups = item.webPartData.properties.Slider;
 
         console.log("canvasContent Item",item.webPartData.title);
         console.log("canvascontent",canvasContent[index]);
         console.log("group title 1", gtitle1);
-        console.log(this.context.instanceId);
+        console.log("instanceID",this.context.instanceId);
       }
     })
+
     //const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
     //const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
     //if(_data.ok){
@@ -180,6 +187,12 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneSlider('numGroups', {
+                  label:'How Many Link Groups? (max 10)',
+                  min:0,
+                  max:10,
+                  value:0
                 })
               ]
             }
