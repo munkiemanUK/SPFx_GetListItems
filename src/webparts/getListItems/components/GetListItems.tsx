@@ -10,7 +10,6 @@ import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
-import {SPHttpClient} from '@microsoft/sp-http';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
 //import Accordion from './AccordionComponent/Accordion';
@@ -143,6 +142,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>{environmentMessage}</div>
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
+        <div id="canvasdata"></div>
         <h4>List Items</h4>
         <div className="accordion" id="linksAccordion">
 
@@ -220,23 +220,24 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
         this.setState({listItems: data});    
       }); 
          
-    // https://maximusunitedkingdom.sharepoint.com/sites/apptesting/_api/sitepages/pages(2)  
-    const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
-    const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
-    if(_data.ok){
-      const results = _data.json();
-      console.log("webpart results",results);
-      if(results){
-        const canvasContent = JSON.parse(results.CanvasContent1);
-        for(const v of canvasContent){
-          if(v.id === this.context.instanceId){
-            console.log("webpart",v.webPartData.properties);
-            break;
-          }
-        }
+    // https://maximusunitedkingdom.sharepoint.com/sites/apptesting/_api/sitepages/pages(2)
+    // https://maximusunitedkingdom.sharepoint.com/_api/web/lists/getbytitle('Site%20Pages')/items(1)/FieldValuesAsText`;  
+    //const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
+    //const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
+    //if(_data.ok){
+     // const results = _data.json();
+     // console.log("webpart results",results);
+     // if(results){
+     //   const canvasContent = JSON.parse(results.CanvasContent1);
+     //   for(const v of canvasContent){
+     //     if(v.id === this.context.instanceId){
+     //       console.log("webpart",v.webPartData.properties);
+     //       break;
+     //     }
+     //   }
         //this.currentPage = results;
-      }
-    }
+     // }
+    //}
     
     //const items : any[] = await this._sp.web.lists.getByTitle('Important Links').items();
     //console.log("items",items);
@@ -252,9 +253,18 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //});
     //console.log(data);
     //this.setState({listItems: data});
+    return;
   }
 
-  public _onRenderItemColumn = (item: IListItem): JSX.Element | string => {
-    return(<h5 className="">{item.linkTitle}</h5>) ;
-  }   
+  //private _renderListAsync(): void {
+    //this._getData()
+    //  .then((response) => {
+    //    console.log(response.json());
+    //  });
+  //}
+
+
+  //public _onRenderItemColumn = (item: IListItem): JSX.Element | string => {
+  //  return(<h5 className="">{item.linkTitle}</h5>) ;
+  //}   
 }
