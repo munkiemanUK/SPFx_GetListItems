@@ -10,6 +10,7 @@ import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
+import {SPHttpClient,SPHttpClientResponse} from '@microsoft/sp-http';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
 //import Accordion from './AccordionComponent/Accordion';
@@ -254,6 +255,20 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //console.log(data);
     //this.setState({listItems: data});
     return;
+  }
+
+  private _getData() : Promise<any> {
+    return this.context.spHttpClient.get(this.context.pageContext.web.absoluteUrl + `/_api/sitepages/pages(1)`, SPHttpClient.configurations.v1)
+      .then((response: SPHttpClientResponse) => {
+        return response.json();
+      })
+  }
+
+  private _renderListAsync(): void {
+    this._getData()
+      .then((response) => {
+        console.log(response.json());
+      });
   }
 
   //private _renderListAsync(): void {
