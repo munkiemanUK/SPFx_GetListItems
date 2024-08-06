@@ -7,4 +7,5 @@ export interface IGetListItemsProps {
   siteURL: string;
   grouptitle1: string;
   numGroups : number;
+  useList: boolean;
 }

@@ -4,7 +4,8 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
-  PropertyPaneSlider
+  PropertyPaneSlider,
+  PropertyPaneCheckbox
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -14,11 +15,12 @@ import GetListItems from './components/GetListItems';
 import { IGetListItemsProps } from './components/IGetListItemsProps';
 import { getSP } from './pnpjsConfig';
 import { SPComponentLoader } from '@microsoft/sp-loader';
-import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
+//import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
 
 export interface IGetListItemsWebPartProps {
   description: string;
   siteURL: string;
+  useList : boolean;
   grouptitle1 : string;
   numGroups : number;
 }
@@ -29,6 +31,11 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
   private _environmentMessage: string = '';
 
   public render(): void {
+
+    //if(!this.properties.useList){
+    //  this.properties.numGroups = 0;
+    //}
+
     const element: React.ReactElement<IGetListItemsProps> = React.createElement(
       GetListItems,
       {
@@ -39,14 +46,16 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
         userDisplayName: this.context.pageContext.user.displayName,
         siteURL: this.context.pageContext.site.absoluteUrl,
         grouptitle1: this.properties.grouptitle1,
-        numGroups : this.properties.numGroups
+        numGroups : this.properties.numGroups,
+        useList: this.properties.useList
       }
     );
 
     ReactDom.render(element, this.domElement);
-    this._renderDataAsync();
+    //this._renderDataAsync();
   }
 
+/*  
   private _renderDataAsync() : void {
     this._getData()
     .then((response) => {
@@ -110,6 +119,7 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
     //});
     //if(link){link.innerHTML += html};
   }
+*/
 
   public async onInit(): Promise<void> {
     await super.onInit();
@@ -187,6 +197,9 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneCheckbox('useList', {
+                  text: 'Use SharePoint List as link data?'
                 }),
                 PropertyPaneSlider('numGroups', {
                   label:'How Many Link Groups? (max 10)',

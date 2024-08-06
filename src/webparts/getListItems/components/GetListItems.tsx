@@ -10,6 +10,7 @@ import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
+import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
 //import Accordion from './AccordionComponent/Accordion';
@@ -17,7 +18,7 @@ import {IColumn} from '@fluentui/react';
 require('bootstrap');
 
 //let panelHTML: string;
-export interface IAsyncAwaitPnPJsProps {
+export interface IGetItemsProps {
   description: string;
 }
 
@@ -25,6 +26,8 @@ export interface IStates {
   listItems: IListItem[];
   listFlag: boolean;
   columns: any;
+  grouptitle1: string;
+  numGroups : number;
 }
 
 export interface IListItem {
@@ -114,12 +117,14 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       listItems: [],
       columns: columns,
       listFlag: false,
+      grouptitle1: "",
+      numGroups : 0    
     };
     this._sp = getSP();
   }
 
   public componentDidMount(): void {
-    this._getListData();
+
   }
 
   public render(): React.ReactElement<IGetListItemsProps> {
@@ -128,10 +133,21 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       isDarkTheme,
       environmentMessage,
       hasTeamsContext,
-      userDisplayName,
+      userDisplayName
     } = this.props;
 
     //console.log("listItems",this.state.listItems);
+
+    if(this.props.useList){
+      alert('using sharepoint list')
+      this._getData()
+      .then((response) => {
+        this._renderData(response);
+        this._getListData();
+      });
+    }else{
+      alert('using property pane data');
+    }
 
     return (
       <section className={`${styles.getListItems} ${hasTeamsContext ? styles.teams : ''}`}>
@@ -141,7 +157,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>{environmentMessage}</div>
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
-        <div>Group Title : {this.props.grouptitle1}</div>
+        <div>Group Title : {this.state.grouptitle1}</div>
         <h4>List Items</h4>
 
         <div className="accordion" id="linksAccordion">
@@ -188,6 +204,64 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
         if (!(responsesec.ok)) { throw new Error(await responsesec.text()); }
         const responseJSONsec: any = await responsesec.json();
 */
+
+  private async _getData() : Promise<any> {
+    const Uri = this.context.pageContext.site.absoluteUrl + `/_api/sitepages/pages(1)?$select=CanvasContent1&expand=CanvasContent1`; //`/_api/web/lists/getbytitle('Site%20Pages')/items(1)/FieldValuesAsHTML`;
+    console.log("Uri",Uri);
+    return await this.context.spHttpClient.get(Uri, SPHttpClient.configurations.v1)
+      .then((response: SPHttpClientResponse) => {
+        console.log(response);
+        return response.json();
+      })
+  } 
+
+  private _renderData(items:any): void {
+    //let id = this.context.pageContext.listItem?.id;
+    const canvasContent = JSON.parse(items.CanvasContent1)
+
+    //console.log("items",items);
+    console.log("group1",canvasContent[8].id);
+    //console.log("canvascontent",canvasContent);
+
+    canvasContent.forEach((item:any,index:number)=>{
+      let wpTitle : string = item.webPartData.title;
+      if(wpTitle === "Important Links"){
+        
+        let gtitle1 : string = item.webPartData.properties.Group1Title;
+        this.setState({grouptitle1:item.webPartData.properties.Group1Title});
+        this.setState({numGroups:item.webPartData.properties.Slider});
+
+        console.log("canvasContent Item",item.webPartData.title);
+        console.log("canvascontent",canvasContent[index]);
+        console.log("group title 1", gtitle1);
+        console.log("instanceID",this.context.instanceId);
+      }
+    })
+
+    //const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
+    //const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
+    //if(_data.ok){
+     // const results = _data.json();
+     // console.log("webpart results",results);
+     // if(results){
+     //   const canvasContent = JSON.parse(results.CanvasContent1);
+     //   for(const v of canvasContent){
+     //     if(v.id === this.context.instanceId){
+     //       console.log("webpart",v.webPartData.properties);
+     //       break;
+     //     }
+     //   }
+        //this.currentPage = results;
+     // }
+    //}
+
+    //let html : string = "";
+    //const link: Element = document.querySelector('#canvasdata')!;
+    //items.forEach((item:any) => {
+    //  html+=`<div>${item.CanvasContent1}</div>`;      
+    //});
+    //if(link){link.innerHTML += html};
+  }
 
   private async _getListData(): Promise<void> { 
     const data:IListItem[]=[];
