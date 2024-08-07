@@ -3,24 +3,27 @@ import styles from './GetListItems.module.scss';
 import type { IGetListItemsProps } from './IGetListItemsProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
-import { SPFI } from "@pnp/sp";
-import { Web } from "@pnp/sp/webs"; 
+//import { SPFI } from "@pnp/sp";
+//import { Web } from "@pnp/sp/webs"; 
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
-import { getSP } from '../pnpjsConfig';
+//import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
 import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
+//import { ChildComponent, _renderData } from './testChildComponent';
+//import {_renderData} from '../GetListItemsWebPart';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
 //import Accordion from './AccordionComponent/Accordion';
 
 require('bootstrap');
+let groupArray : any[]=[];
 
 //let panelHTML: string;
-export interface IGetItemsProps {
-  description: string;
-}
+//export interface IGetItemsProps {
+//  description: string;
+//}
 
 export interface IStates {  
   listItems: IListItem[];
@@ -44,7 +47,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
   //  super(props);
   //}
 
-  private _sp: SPFI;
+  //private _sp: SPFI;
 
   constructor(props: IGetListItemsProps) {
     super(props);
@@ -120,12 +123,17 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       grouptitle1: "",
       numGroups : 0    
     };
-    this._sp = getSP();
+
+    // Bind control events
+    //this.handleCallbak = this.handleCallbak.bind(this);
+    //this._sp = getSP();
   }
 
-  public componentDidMount(): void {
-
-  }
+  //private handleCallbak(groupTitle: string): void {
+  //  this.setState({
+  //    grouptitle1: groupTitle
+  //  });
+  //}
 
   public render(): React.ReactElement<IGetListItemsProps> {
     const {
@@ -133,18 +141,31 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       isDarkTheme,
       environmentMessage,
       hasTeamsContext,
-      userDisplayName
+      userDisplayName,
+      siteURL,
+      //gTitleArray
     } = this.props;
 
     //console.log("listItems",this.state.listItems);
 
     if(this.props.useList){
-      alert('using sharepoint list')
-      this._getData()
-      .then((response) => {
+
+      alert('using sharepoint list');
+      this._getData().then((response) => {
         this._renderData(response);
-        this._getListData();
+        //console.log("group array",this.props.gTitleArray);
+        //this._getListData();
       });
+
+      //*** figure out how to update state without re-rendering / re-loading
+
+      //this.setState({numGroups:groupArray[0].Slider});
+      //const [num,setGroups] = React.useState(groupArray[0].Slider);
+      //setGroups({
+      //  ...num,
+      //  numGroups:groupArray[0].Slider
+      //})
+
     }else{
       alert('using property pane data');
     }
@@ -155,32 +176,34 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
           <h2>Well done, {escape(userDisplayName)}!</h2>
           <div>{environmentMessage}</div>
+          <div>siteURL : {escape(siteURL)}</div>
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
-        <div>Group Title : {this.state.grouptitle1}</div>
+        {[/*<ChildComponent/>*/]}
+        <div>Group Title : {this.props.groupTitle1}</div>
         <h4>List Items</h4>
 
         <div className="accordion" id="linksAccordion">
-        {this.state.listItems.map(function(item) {
-          let dataTarget = `#group${item.linkGroupID}`;
-          let accordionID = `group${item.linkGroupID}`;
+          {this.state.listItems.map(function(item) {
+            let dataTarget = `#group${item.linkGroupID}`;
+            let accordionID = `group${item.linkGroupID}`;
 
-          return(
-            <div className="accordion-item">
-              <h2 className="accordion-header">
-                <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={dataTarget} aria-expanded="true" aria-controls="collapseOne">
-                  Accordion {item.linkGroupID} 
-                </button>
-              </h2>
-              <div id={accordionID} className="accordion-collapse collapse show" data-bs-parent="#linksAccordion">
-                <div className="accordion-body">
-                  <h5 className="">{item.linkTitle}</h5>
+            return(
+              <div className="accordion-item">
+                <h2 className="accordion-header">
+                  <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={dataTarget} aria-expanded="true" aria-controls="collapseOne">
+                    Accordion {item.linkGroupID} 
+                  </button>
+                </h2>
+                <div id={accordionID} className="accordion-collapse collapse show" data-bs-parent="#linksAccordion">
+                  <div className="accordion-body">
+                    <h5 className="">{item.linkTitle}</h5>
+                  </div>
                 </div>
-              </div>
-            </div>            
-          );
-        })}
-      </div>
+              </div>            
+            );
+          })}
+        </div>
   
       </section>
     );
@@ -206,37 +229,48 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
 */
 
   private async _getData() : Promise<any> {
-    const Uri = this.context.pageContext.site.absoluteUrl + `/_api/sitepages/pages(1)?$select=CanvasContent1&expand=CanvasContent1`; //`/_api/web/lists/getbytitle('Site%20Pages')/items(1)/FieldValuesAsHTML`;
+    const Uri = this.props.siteURL + `/_api/sitepages/pages(1)?$select=CanvasContent1&expand=CanvasContent1`; //`/_api/web/lists/getbytitle('Site%20Pages')/items(1)/FieldValuesAsHTML`;
     console.log("Uri",Uri);
-    return await this.context.spHttpClient.get(Uri, SPHttpClient.configurations.v1)
+    return await this.props.spHttpClient.get(Uri, SPHttpClient.configurations.v1)
       .then((response: SPHttpClientResponse) => {
-        console.log(response);
         return response.json();
       })
-  } 
+  }
+
 
   private _renderData(items:any): void {
     //let id = this.context.pageContext.listItem?.id;
+    let index : number = 0;
     const canvasContent = JSON.parse(items.CanvasContent1)
-
-    //console.log("items",items);
-    console.log("group1",canvasContent[8].id);
+    
+    console.log("items",items);
+    console.log("group1 id",canvasContent[8].id);
     //console.log("canvascontent",canvasContent);
 
-    canvasContent.forEach((item:any,index:number)=>{
-      let wpTitle : string = item.webPartData.title;
-      if(wpTitle === "Important Links"){
+    //canvasContent.forEach((item:any,index:number)=>{
+    for(const item of canvasContent){
+      if(item.webPartData.title !== ""){
+        let wpTitle : string = item.webPartData.title;
         
-        let gtitle1 : string = item.webPartData.properties.Group1Title;
-        this.setState({grouptitle1:item.webPartData.properties.Group1Title});
-        this.setState({numGroups:item.webPartData.properties.Slider});
+        if(wpTitle === "Important Links"){        
+          //this.props.gTitleArray.push(item.webPartData.properties);
+          groupArray.push(item.webPartData.properties);
+        //  this.setState({grouptitle1:item.webPartData.properties.Group1Title});
+        //  this.setState({numGroups:item.webPartData.properties.Slider});
 
-        console.log("canvasContent Item",item.webPartData.title);
-        console.log("canvascontent",canvasContent[index]);
-        console.log("group title 1", gtitle1);
-        console.log("instanceID",this.context.instanceId);
+          console.log("canvasContent Item",item.webPartData.title);
+          console.log("canvascontent",canvasContent[index]);
+          console.log("instanceID",this.props.context.instanceId);
+          break;          
+        }
+        index++;
       }
-    })
+    }
+    //})
+
+    console.log("group title 1",groupArray[0].Group1Title);
+    
+        //  this.setState({numGroups:item.webPartData.properties.Slider});
 
     //const apiURL = `${this.props.siteURL}/_api/sitepages/pages(${this.context.pageContext.listItem.id})`;
     //const _data = this.context.spHttpClient.get(apiURL, SPHttpClient.configurations.v1);
@@ -261,8 +295,14 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //  html+=`<div>${item.CanvasContent1}</div>`;      
     //});
     //if(link){link.innerHTML += html};
+    
   }
 
+  public componentDidMount(): void {
+    //this.setState({numGroups:groupArray[0].Slider});
+  }
+
+/*  
   private async _getListData(): Promise<void> { 
     const data:IListItem[]=[];
     const view =`<View>
@@ -327,6 +367,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //this.setState({listItems: data});
     return;
   }
+*/
 
   //private _getData() : Promise<any> {
   //  return this.context.spHttpClient.get(this.context.pageContext.web.absoluteUrl + `/_api/sitepages/pages(1)`, SPHttpClient.configurations.v1)
@@ -348,7 +389,6 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
     //    console.log(response.json());
     //  });
   //}
-
 
   //public _onRenderItemColumn = (item: IListItem): JSX.Element | string => {
   //  return(<h5 className="">{item.linkTitle}</h5>) ;

@@ -21,10 +21,36 @@ export interface IGetListItemsWebPartProps {
   description: string;
   siteURL: string;
   useList : boolean;
-  grouptitle1 : string;
+  groupTitle1 : string;
   numGroups : number;
 }
 
+/*
+export function _renderData(items:any): React.ReactElement<IGetListItemsWebPartProps> {
+  //let id = this.context.pageContext.listItem?.id;
+  const canvasContent = JSON.parse(items.CanvasContent1)
+
+  //console.log("items",items);
+  console.log("group1",canvasContent[8].id);
+  //console.log("canvascontent",canvasContent);
+
+  canvasContent.forEach((item:any,index:number)=>{
+    let wpTitle : string = item.webPartData.title;
+    if(wpTitle === "Important Links"){
+      
+      let gtitle1 : string = item.webPartData.properties.Group1Title;
+      this.properties.groupTitle1 = item.webPartData.properties.Group1Title;
+      this.properties.numGroups = item.webPartData.properties.Slider;
+
+      console.log("canvasContent Item",item.webPartData.title);
+      console.log("canvascontent",canvasContent[index]);
+      console.log("group title 1", gtitle1);
+      console.log("instanceID",this.context.instanceId);
+    }
+  })
+  return canvasContent
+}
+*/
 export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListItemsWebPartProps> {
 
   private _isDarkTheme: boolean = false;
@@ -45,9 +71,12 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         siteURL: this.context.pageContext.site.absoluteUrl,
-        grouptitle1: this.properties.grouptitle1,
+        groupTitle1: this.properties.groupTitle1,
         numGroups : this.properties.numGroups,
-        useList: this.properties.useList
+        useList: this.properties.useList,
+        spHttpClient: this.context.spHttpClient,
+        context: this.context,
+        gTitleArray:[]
       }
     );
 

@@ -1,3 +1,5 @@
+import {SPHttpClient} from '@microsoft/sp-http';
+
 export interface IGetListItemsProps {
   description: string;
   isDarkTheme: boolean;
@@ -5,7 +7,10 @@ export interface IGetListItemsProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   siteURL: string;
-  grouptitle1: string;
+  groupTitle1: string;
   numGroups : number;
   useList: boolean;
+  context: any;
+  spHttpClient: SPHttpClient;
+  gTitleArray: string[];
 }
