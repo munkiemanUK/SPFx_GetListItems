@@ -13,4 +13,5 @@ export interface IGetListItemsProps {
   context: any;
   spHttpClient: SPHttpClient;
   gTitleArray: string[];
+  dataFromParent: any;
 }

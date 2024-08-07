@@ -11,7 +11,7 @@ import "@pnp/sp/items";
 //import { getSP } from '../pnpjsConfig';
 import {IColumn} from '@fluentui/react';
 import {SPHttpClient, SPHttpClientResponse} from '@microsoft/sp-http';
-//import { ChildComponent, _renderData } from './testChildComponent';
+//import ChildComponent from './testChildComponent';
 //import {_renderData} from '../GetListItemsWebPart';
 
 //DetailsList, DetailsListLayoutMode, SelectionMode
@@ -146,11 +146,13 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
       //gTitleArray
     } = this.props;
 
+    //const data="hello from parent";
+
     //console.log("listItems",this.state.listItems);
 
     if(this.props.useList){
 
-      alert('using sharepoint list');
+      //alert('using sharepoint list');
       this._getData().then((response) => {
         this._renderData(response);
         //console.log("group array",this.props.gTitleArray);
@@ -159,15 +161,15 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
 
       //*** figure out how to update state without re-rendering / re-loading
 
-      //this.setState({numGroups:groupArray[0].Slider});
+    //  this.setState({numGroups:groupArray[0].Slider});
       //const [num,setGroups] = React.useState(groupArray[0].Slider);
       //setGroups({
       //  ...num,
       //  numGroups:groupArray[0].Slider
       //})
 
-    }else{
-      alert('using property pane data');
+    //}else{
+    //  alert('using property pane data');
     }
 
     return (
@@ -179,7 +181,9 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
           <div>siteURL : {escape(siteURL)}</div>
           <div>Web part property value: <strong>{escape(description)}</strong></div>
         </div>
-        {[/*<ChildComponent/>*/]}
+        
+        {[/*<ChildComponent dataFromParent={data} />*/]}
+
         <div>Group Title : {this.props.groupTitle1}</div>
         <h4>List Items</h4>
 
@@ -299,7 +303,8 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
   }
 
   public componentDidMount(): void {
-    //this.setState({numGroups:groupArray[0].Slider});
+    //  this.setState({numGroups:groupArray[0].Slider});
+    console.log("groups array",groupArray[1].Slider);
   }
 
 /*  

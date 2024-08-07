@@ -23,6 +23,7 @@ export interface IGetListItemsWebPartProps {
   useList : boolean;
   groupTitle1 : string;
   numGroups : number;
+  dataFromParent: any;
 }
 
 /*
@@ -76,7 +77,8 @@ export default class GetListItemsWebPart extends BaseClientSideWebPart<IGetListI
         useList: this.properties.useList,
         spHttpClient: this.context.spHttpClient,
         context: this.context,
-        gTitleArray:[]
+        gTitleArray:[],
+        dataFromParent: this.properties.dataFromParent
       }
     );
 

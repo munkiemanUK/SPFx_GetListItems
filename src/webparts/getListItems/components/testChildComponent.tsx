@@ -6,12 +6,20 @@ export interface IChildProps {
     parentCallback: (childData: string) => void;
 }
 
-export const ChildComponent: React.FunctionComponent<{}> = (props) => {
-    return (
-        <div>ChildComponent from import</div>
-    );
+export default class ChildComponent extends React.Component<IGetListItemsProps> {
+  render() {
+    return <div>{this.props.dataFromParent}</div>
+  }
 }
 
+
+//export const ChildComponent: React.FunctionComponent<{}> = (props) => {
+//    return (
+//        <div>ChildComponent from import</div>
+//    );
+//}
+
+/*
 export function _renderData(items:any): React.ReactElement<IGetListItemsProps> {
     //let id = this.context.pageContext.listItem?.id;
     const canvasContent = JSON.parse(items.CanvasContent1)
@@ -36,3 +44,4 @@ export function _renderData(items:any): React.ReactElement<IGetListItemsProps> {
     })
     return canvasContent;
 }
+*/
