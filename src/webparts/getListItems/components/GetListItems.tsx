@@ -304,7 +304,7 @@ export default class GetListItems extends React.Component<IGetListItemsProps,ISt
 
   public componentDidMount(): void {
     //  this.setState({numGroups:groupArray[0].Slider});
-    console.log("groups array",groupArray[1].Slider);
+    //console.log("groups array",groupArray[1].Slider);
   }
 
 /*  
